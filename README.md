@@ -49,10 +49,16 @@ If you want to learn more about building native executables, please consult http
 
 ## Related Guides
 For Starting Kubernetes DashBoard used command: kubectl proxy
+
 Dashboard URL: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
 
-Expose the Deployment as a Kubernetes service object using command: kubectl expose deployment my-app --port=80 --target-port=8080
-Port Forward the service using command : kubectl port-forward service/my-app 8080:80
+Expose the Deployment as a Kubernetes service object using command: 
+
+kubectl expose deployment my-app --port=80 --target-port=8080
+
+Port Forward the service using command : 
+
+kubectl port-forward service/my-app 8080:80
 ## Provided Code
 
 ### RESTEasy JAX-RS
