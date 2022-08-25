@@ -45,7 +45,7 @@
 				<version>3.2.1</version>
 				<configuration>
 					<to>
-						<image>registry.hub.docker.com/rajivksingh13/skaffold-teachlea:1.0.0</image>
+						<image>registry.hub.docker.com/rajivksingh13/skaffold-springboot-demo:1.0.0</image>
 						<auth>
 							<username>********</username>
 							<password>*********</password>
