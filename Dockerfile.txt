@@ -1,0 +1,9 @@
+FROM jenkins/jenkins
+
+ENV JENKINS_USER admin
+ENV JENKINS_PASS admin
+
+# Skip initial setup
+ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400
+
+EXPOSE 8080
