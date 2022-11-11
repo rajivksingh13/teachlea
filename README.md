@@ -46,3 +46,7 @@ kubectl cluster-info
 kubectl get svc
 
 kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts
+
+kubectl apply -f jenkins-pv.yaml -n jenkins
+
+kubectl apply -f jenkins-pvc.yaml -n jenkins
