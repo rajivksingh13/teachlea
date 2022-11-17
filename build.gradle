@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.teachlea'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+//sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -20,7 +20,7 @@ dependencies {
 
 jib {
 	to {
-		image = 'registry.hub.docker.com/rajivksingh13/my-gradle-teachlea:1.1.1'
+		image = 'registry.hub.docker.com/rajivksingh13/my-gradle-teachlea:1.1.2'
 		auth {
 			username = '*******'
 			password = '*****'
