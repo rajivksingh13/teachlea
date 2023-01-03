@@ -26,14 +26,14 @@ public class BankAccount {
     // Deposit Money to Bank Account
     public void deposit(){
         /**
-         * Code related to Deposit Money to Bank Account
+         * Code related to Deposit Money to Bank Transaction
          */
     }
 
     // Withdraw Money from Bank Account
     public void withdraw(){
         /**
-         * Code related to Withdraw Money to Bank Account
+         * Code related to Withdraw Money to Bank Transaction
          */
     }
     // Send OTP Notifications
