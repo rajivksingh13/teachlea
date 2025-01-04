@@ -6,7 +6,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 # import redis
-import pysqlite3
+import sqlite3
 
 # Initialize a Redis client (replace with your own configuration)
 # redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
