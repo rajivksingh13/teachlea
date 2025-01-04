@@ -10,7 +10,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 # os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 # Set up OpenAI API key
 openai.api_key = st.secrets["OPEN_AI_KEY"]
-#openai.api_key = "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"
 
 # Function to extract text from a PDF file
 def extract_text_from_pdf(pdf_file):
