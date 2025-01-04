@@ -91,7 +91,9 @@ if "mcqs" in st.session_state:
                             st.success(f"**Q{idx + 1}:** Correct!")
                             score += 1
                         else:
-                            st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct}.")
+                            # Show the correct answer if user's answer is wrong
+                            correct_option = mcq["options"][ord(correct.lower()) - ord('a')]
+                            st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct_option}")
 
                     else:
                         st.warning(f"**Q{idx + 1}:** No answer selected.")
