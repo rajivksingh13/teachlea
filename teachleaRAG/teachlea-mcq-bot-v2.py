@@ -86,13 +86,15 @@ if "mcqs" in st.session_state:
                         correct = mcq["correct_answer"]
                         user_answer = mcq["user_answer"]
 
-                        # Validate directly by checking if the user's answer matches the correct answer
-                        if user_answer.startswith(correct):
+                        # Match the correct answer (which is given as 'a', 'b', 'c', or 'd') with the option list
+                        correct_option = mcq["options"][ord(correct.lower()) - ord('a')]
+
+                        # Validate directly by checking if the user's answer matches the correct option
+                        if user_answer == correct_option:
                             st.success(f"**Q{idx + 1}:** Correct!")
                             score += 1
                         else:
-                            # Show the correct answer if user's answer is wrong
-                            correct_option = mcq["options"][ord(correct.lower()) - ord('a')]
+                            # Show the correct answer as text (e.g., Option a: correct option)
                             st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct_option}")
 
                     else:
