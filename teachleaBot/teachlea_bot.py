@@ -18,7 +18,7 @@ def get_openai_response(user_input):
     except Exception as e:
         return f"Error: {e}"
 # Streamlit app
-st.title("Simple Chatbot")
+st.title("teachlea Bot")
 st.write("Powered by OpenAI and Streamlit")
 # Store chat history in session state
 if "messages" not in st.session_state:
