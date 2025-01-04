@@ -16,7 +16,7 @@ load_dotenv()
 openai.api_key = st.secrets["OPEN_AI_KEY"]
 
 # Streamlit UI
-st.title("PDF RAG Chatbot with FAISS")
+st.title("TeachLea RAG AI")
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
 if uploaded_file:
