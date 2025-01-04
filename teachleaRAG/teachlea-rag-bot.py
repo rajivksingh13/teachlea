@@ -23,7 +23,7 @@ def extract_text_from_pdf(pdf_file):
 def create_vector_database(text):
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text(text)
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key)
     vectordb = Chroma.from_texts(chunks, embeddings)
     return vectordb
 
