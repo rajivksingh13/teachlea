@@ -7,3 +7,4 @@ langchain-community==0.3.14
 chromadb==0.6.1
 tiktoken==0.8.0
 SQLAlchemy == 2.0.36
+redis==5.2.1

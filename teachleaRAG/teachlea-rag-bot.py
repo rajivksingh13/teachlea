@@ -4,10 +4,13 @@ import openai
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
+import redis
+
+# Initialize a Redis client (replace with your own configuration)
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 # from dotenv import load_dotenv
 # load_dotenv()
-# os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 # Set up OpenAI API key
 openai.api_key = st.secrets["OPEN_AI_KEY"]
 
@@ -23,8 +26,8 @@ def extract_text_from_pdf(pdf_file):
 def create_vector_database(text):
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text(text)
-    embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key)
-    vectordb = Chroma.from_texts(chunks, embeddings)
+    embeddings = OpenAIEmbeddings()
+    vectordb = Chroma.from_texts(chunks, embeddings, client=redis_client)
     return vectordb
 
 # Function to perform RAG-based retrieval and generation
