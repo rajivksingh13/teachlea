@@ -48,20 +48,23 @@ Each question should include 4 options and clearly indicate the correct answer. 
 
             # Parse response
             generated_mcqs = response['choices'][0]['message']['content'].strip().split("\n\n")
-
-            # Store MCQs in session state
             st.session_state.mcqs = []
             for mcq in generated_mcqs:
-                if mcq.strip():
-                    question, *options = mcq.split("\n")
-                    correct_answer = options[-1].split(":")[-1].strip()
+                lines = mcq.split("\n")
+                if len(lines) >= 6:  # Ensure valid structure (1 question + 4 options + 1 answer line)
+                    question = lines[0].strip()
+                    options = [line.strip() for line in lines[1:5]]
+                    correct_answer = lines[5].split(":")[-1].strip()
                     st.session_state.mcqs.append({
                         "question": question,
-                        "options": options[:-1],
+                        "options": options,
                         "correct_answer": correct_answer,
                         "user_answer": None
                     })
-            st.success("MCQs Generated Successfully!")
+            if not st.session_state.mcqs:
+                st.error("Failed to parse MCQs. Please try again.")
+            else:
+                st.success("MCQs Generated Successfully!")
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
@@ -74,37 +77,42 @@ if "mcqs" in st.session_state:
 
     if st.button("Submit Answers"):
         with st.spinner("Validating your answers..."):
-            # Generate validation prompt
-            validation_prompt = "Here are the MCQs. Validate the correct answers:\n\n"
-            for mcq in st.session_state.mcqs:
-                validation_prompt += f"{mcq['question']}\n"
-                validation_prompt += "\n".join(mcq["options"]) + "\n"
+            try:
+                # Generate validation prompt
+                validation_prompt = "Here are the MCQs. Validate the correct answers:\n\n"
+                for mcq in st.session_state.mcqs:
+                    validation_prompt += f"{mcq['question']}\n"
+                    validation_prompt += "\n".join(mcq["options"]) + "\n"
 
-            validation_response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an educational assistant."},
-                    {"role": "user", "content": validation_prompt}
-                ],
-                temperature=0.7
-            )
-            validation_answers = validation_response['choices'][0]['message']['content'].strip().split("\n")
+                validation_response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are an educational assistant."},
+                        {"role": "user", "content": validation_prompt}
+                    ],
+                    temperature=0.7
+                )
+                validation_answers = validation_response['choices'][0]['message']['content'].strip().split("\n")
 
-            # Display results
-            st.header("Results")
-            score = 0
-            for idx, mcq in enumerate(st.session_state.mcqs):
-                correct_answer_line = validation_answers[idx].split(":")[-1].strip()
-                mcq["correct_answer"] = correct_answer_line
+                # Display results
+                st.header("Results")
+                score = 0
+                for idx, mcq in enumerate(st.session_state.mcqs):
+                    if idx < len(validation_answers):
+                        correct_answer_line = validation_answers[idx].split(":")[-1].strip()
+                        mcq["correct_answer"] = correct_answer_line
 
-                st.write(f"**Q{idx + 1}:** {mcq['question']}")
-                st.write(f"Your Answer: {mcq['user_answer']}")
-                st.write(f"Correct Answer: {mcq['correct_answer']}")
+                        st.write(f"**Q{idx + 1}:** {mcq['question']}")
+                        st.write(f"Your Answer: {mcq['user_answer']}")
+                        st.write(f"Correct Answer: {mcq['correct_answer']}")
 
-                if mcq["user_answer"].startswith(mcq["correct_answer"]):
-                    st.success("✅ Correct!")
-                    score += 1
-                else:
-                    st.error("❌ Incorrect!")
-
-            st.write(f"**Your Total Score: {score}/{len(st.session_state.mcqs)}**")
+                        if mcq["user_answer"].startswith(mcq["correct_answer"]):
+                            st.success("✅ Correct!")
+                            score += 1
+                        else:
+                            st.error("❌ Incorrect!")
+                    else:
+                        st.warning(f"Unable to validate Q{idx + 1}.")
+                st.write(f"**Your Total Score: {score}/{len(st.session_state.mcqs)}**")
+            except Exception as e:
+                st.error(f"An error occurred during validation: {e}")
