@@ -11,7 +11,7 @@ import streamlit as st
 # Set your OpenAI API key
 openai.api_key = st.secrets["OPEN_AI_KEY"]
 # Streamlit UI
-st.title("MCQ Generator with OpenAI")
+st.title("Teachlea MCQ Generator with OpenAI")
 
 st.sidebar.header("Instructions")
 st.sidebar.write("""
