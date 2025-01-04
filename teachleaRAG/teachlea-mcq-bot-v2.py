@@ -21,7 +21,7 @@ st.sidebar.write("""
 """)
 
 # Input: Topic and number of questions
-topic = st.text_input("Enter the topic for MCQs:", "Python Programming")
+topic = st.text_input("Enter the topic for MCQs:", "Math")
 num_questions = st.number_input("Number of MCQs to generate:", min_value=1, max_value=20, value=5)
 
 if st.button("Generate MCQs"):
@@ -60,21 +60,21 @@ Each question should include 4 options and clearly indicate the correct answer. 
                     # Extract the correct answer using regex
                     answer_match = re.search(r"Correct Answer: ([a-dA-D])", lines[5])
                     if answer_match:
-                        correct_answer = answer_match.group(1).lower()
-                        st.session_state.mcqs.append({
-                            "question": question,
-                            "options": options,
-                            "correct_answer": correct_answer,
-                            "user_answer": None
-                        })
+                        correct_letter = answer_match.group(1).lower()
+                        if ord(correct_letter) - ord('a') < len(options):
+                            correct_answer = options[ord(correct_letter) - ord('a')]
+                            st.session_state.mcqs.append({
+                                "question": question,
+                                "options": options,
+                                "correct_answer": correct_answer,
+                                "user_answer": None
+                            })
+                        else:
+                            st.warning(f"Correct answer index out of range for question: {question}")
                     else:
-                        st.warning(f"Invalid answer format for question: {question}. Including it for review.")
-                        st.session_state.mcqs.append({
-                            "question": question,
-                            "options": options,
-                            "correct_answer": None,
-                            "user_answer": None
-                        })
+                        st.warning(f"Invalid answer format for question: {question}. Skipping this question.")
+                else:
+                    st.warning(f"Invalid format for question: {mcq}. Skipping this question.")
 
             if not st.session_state.mcqs:
                 st.error("Failed to parse MCQs correctly. Please try again.")
@@ -88,10 +88,7 @@ if "mcqs" in st.session_state:
     st.header("Answer the MCQs")
     for idx, mcq in enumerate(st.session_state.mcqs):
         st.subheader(mcq["question"])
-        if mcq["correct_answer"]:
-            mcq["user_answer"] = st.radio(f"Select your answer for Q{idx + 1}:", mcq["options"], key=f"q{idx}")
-        else:
-            st.warning("This question has no valid correct answer. Skipping validation.")
+        mcq["user_answer"] = st.radio(f"Select your answer for Q{idx + 1}:", mcq["options"], key=f"q{idx}")
 
     if st.button("Submit Answers"):
         with st.spinner("Validating your answers..."):
@@ -99,18 +96,14 @@ if "mcqs" in st.session_state:
                 st.header("Results")
                 score = 0
                 for idx, mcq in enumerate(st.session_state.mcqs):
-                    if mcq["correct_answer"]:
-                        correct = mcq["correct_answer"]
-                        correct_option = mcq["options"][ord(correct) - ord('a')]
-                        user_answer = mcq["user_answer"]
+                    correct_option = mcq["correct_answer"]
+                    user_answer = mcq["user_answer"]
 
-                        if user_answer == correct_option:
-                            st.success(f"**Q{idx + 1}:** Correct!")
-                            score += 1
-                        else:
-                            st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct_option}")
+                    if user_answer == correct_option:
+                        st.success(f"**Q{idx + 1}:** Correct!")
+                        score += 1
                     else:
-                        st.warning(f"**Q{idx + 1}:** No valid correct answer provided for this question.")
+                        st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct_option}")
 
                 st.write(f"**Your Total Score: {score}/{len(st.session_state.mcqs)}**")
 
