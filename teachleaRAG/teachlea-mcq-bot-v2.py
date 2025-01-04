@@ -1,5 +1,6 @@
 import openai
 import streamlit as st
+import re
 # from dotenv import load_dotenv
 # import os
 
@@ -49,15 +50,17 @@ Each question should include 4 options and clearly indicate the correct answer. 
             # Parse response
             generated_mcqs = response['choices'][0]['message']['content'].strip().split("\n\n")
             st.session_state.mcqs = []
+
             for mcq in generated_mcqs:
                 lines = mcq.split("\n")
                 if len(lines) >= 6:  # Ensure valid structure (1 question + 4 options + 1 answer line)
                     question = lines[0].strip()
                     options = [line.strip() for line in lines[1:5]]
-                    correct_answer = lines[5].split(":")[-1].strip().lower()
 
-                    # Check if correct_answer is a valid single letter option
-                    if correct_answer in ['a', 'b', 'c', 'd']:
+                    # Extract the correct answer using regex
+                    answer_match = re.search(r"Correct Answer: ([a-dA-D])", lines[5])
+                    if answer_match:
+                        correct_answer = answer_match.group(1).lower()
                         st.session_state.mcqs.append({
                             "question": question,
                             "options": options,
@@ -65,7 +68,13 @@ Each question should include 4 options and clearly indicate the correct answer. 
                             "user_answer": None
                         })
                     else:
-                        st.error(f"Invalid answer format for question: {question}. Skipping this question.")
+                        st.warning(f"Invalid answer format for question: {question}. Including it for review.")
+                        st.session_state.mcqs.append({
+                            "question": question,
+                            "options": options,
+                            "correct_answer": None,
+                            "user_answer": None
+                        })
 
             if not st.session_state.mcqs:
                 st.error("Failed to parse MCQs correctly. Please try again.")
@@ -79,7 +88,10 @@ if "mcqs" in st.session_state:
     st.header("Answer the MCQs")
     for idx, mcq in enumerate(st.session_state.mcqs):
         st.subheader(mcq["question"])
-        mcq["user_answer"] = st.radio(f"Select your answer for Q{idx + 1}:", mcq["options"], key=f"q{idx}")
+        if mcq["correct_answer"]:
+            mcq["user_answer"] = st.radio(f"Select your answer for Q{idx + 1}:", mcq["options"], key=f"q{idx}")
+        else:
+            st.warning("This question has no valid correct answer. Skipping validation.")
 
     if st.button("Submit Answers"):
         with st.spinner("Validating your answers..."):
@@ -87,24 +99,18 @@ if "mcqs" in st.session_state:
                 st.header("Results")
                 score = 0
                 for idx, mcq in enumerate(st.session_state.mcqs):
-                    # Ensure that user_answer is selected
-                    if mcq["user_answer"]:
+                    if mcq["correct_answer"]:
                         correct = mcq["correct_answer"]
+                        correct_option = mcq["options"][ord(correct) - ord('a')]
                         user_answer = mcq["user_answer"]
 
-                        # Match the correct answer (which is given as 'a', 'b', 'c', or 'd') with the option list
-                        correct_option = mcq["options"][ord(correct) - ord('a')]
-
-                        # Validate directly by checking if the user's answer matches the correct option
                         if user_answer == correct_option:
                             st.success(f"**Q{idx + 1}:** Correct!")
                             score += 1
                         else:
-                            # Show the correct answer as text (e.g., Option a: correct option)
                             st.error(f"**Q{idx + 1}:** Incorrect. Correct answer: {correct_option}")
-
                     else:
-                        st.warning(f"**Q{idx + 1}:** No answer selected.")
+                        st.warning(f"**Q{idx + 1}:** No valid correct answer provided for this question.")
 
                 st.write(f"**Your Total Score: {score}/{len(st.session_state.mcqs)}**")
 
