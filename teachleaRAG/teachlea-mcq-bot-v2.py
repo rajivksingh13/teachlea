@@ -54,15 +54,21 @@ Each question should include 4 options and clearly indicate the correct answer. 
                 if len(lines) >= 6:  # Ensure valid structure (1 question + 4 options + 1 answer line)
                     question = lines[0].strip()
                     options = [line.strip() for line in lines[1:5]]
-                    correct_answer = lines[5].split(":")[-1].strip()
-                    st.session_state.mcqs.append({
-                        "question": question,
-                        "options": options,
-                        "correct_answer": correct_answer,
-                        "user_answer": None
-                    })
+                    correct_answer = lines[5].split(":")[-1].strip().lower()
+
+                    # Check if correct_answer is a valid single letter option
+                    if correct_answer in ['a', 'b', 'c', 'd']:
+                        st.session_state.mcqs.append({
+                            "question": question,
+                            "options": options,
+                            "correct_answer": correct_answer,
+                            "user_answer": None
+                        })
+                    else:
+                        st.error(f"Invalid answer format for question: {question}. Skipping this question.")
+
             if not st.session_state.mcqs:
-                st.error("Failed to parse MCQs. Please try again.")
+                st.error("Failed to parse MCQs correctly. Please try again.")
             else:
                 st.success("MCQs Generated Successfully!")
         except Exception as e:
@@ -87,7 +93,7 @@ if "mcqs" in st.session_state:
                         user_answer = mcq["user_answer"]
 
                         # Match the correct answer (which is given as 'a', 'b', 'c', or 'd') with the option list
-                        correct_option = mcq["options"][ord(correct.lower()) - ord('a')]
+                        correct_option = mcq["options"][ord(correct) - ord('a')]
 
                         # Validate directly by checking if the user's answer matches the correct option
                         if user_answer == correct_option:
