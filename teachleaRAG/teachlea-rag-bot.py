@@ -5,10 +5,11 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
-import redis
+# import redis
+import pysqlite3
 
 # Initialize a Redis client (replace with your own configuration)
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+# redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 # from dotenv import load_dotenv
 # load_dotenv()
 # Set up OpenAI API key
@@ -27,7 +28,7 @@ def create_vector_database(text):
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text(text)
     embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key)
-    vectordb = Chroma.from_texts(chunks, embeddings, client=redis_client)
+    vectordb = Chroma.from_texts(chunks, embeddings)
     return vectordb
 
 # Function to perform RAG-based retrieval and generation
