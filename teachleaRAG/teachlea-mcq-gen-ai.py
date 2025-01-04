@@ -39,15 +39,17 @@ Each question should include 4 options and clearly indicate the correct answer. 
     d) Option 4
     Correct Answer: (letter corresponding to the correct answer)
 """
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=prompt,
-                max_tokens=1500,
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an educational assistant."},
+                    {"role": "user", "content": prompt}
+                ],
                 temperature=0.7
             )
 
             # Display the generated MCQs
             st.success("MCQs Generated Successfully!")
-            st.markdown(response.choices[0].text.strip())
+            st.markdown(response['choices'][0]['message']['content'].strip())
         except Exception as e:
             st.error(f"An error occurred: {e}")
