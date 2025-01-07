@@ -6,5 +6,5 @@ openai
 sounddevice
 gtts
 langchain
-langchain.chat_models
-langchain.prompts
+langchain-chat-models
+langchain-prompts
