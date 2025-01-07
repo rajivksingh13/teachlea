@@ -5,3 +5,5 @@ pyttsx3
 openai
 sounddevice
 gtts
+langchain
+langchain-community
