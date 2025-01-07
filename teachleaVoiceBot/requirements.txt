@@ -3,4 +3,5 @@ streamlit
 speechrecognition
 pyttsx3
 openai
-pyaudio==0.2.14
+sounddevice
+gtts

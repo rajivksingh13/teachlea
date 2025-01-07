@@ -1,79 +1,64 @@
-import openai
 import streamlit as st
+import openai
 import speech_recognition as sr
-import pyttsx3
-# from dotenv import load_dotenv
+from gtts import gTTS
 # import os
+from io import BytesIO
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
+# from dotenv import load_dotenv
 
 # Load environment variables
 # load_dotenv()
-# openai.api_key = st.secrets.get("OPEN_AI_KEY") or os.getenv("OPEN_AI_KEY")
 openai.api_key = st.secrets["OPEN_AI_KEY"]
-# Initialize TTS engine
-tts_engine = pyttsx3.init()
 
-def speak_text(text):
-    """Converts text to speech."""
-    tts_engine.say(text)
-    tts_engine.runAndWait()
+# Initialize Streamlit
+st.title("Voice-Enabled Chatbot")
+st.info("Speak into your microphone to interact with the bot.")
 
-def recognize_speech_from_microphone():
-    """Captures and transcribes voice input using the microphone."""
-    recognizer = sr.Recognizer()
-    mic = sr.Microphone()
+# Initialize recognizer
+recognizer = sr.Recognizer()
 
+# Set up conversation history
+chat_history = []
+
+# Function to transcribe audio
+def transcribe_audio(audio_data):
     try:
-        with mic as source:
-            st.info("Listening... Please speak now.")
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source)
-        st.info("Processing your voice input...")
+        with sr.AudioFile(audio_data) as source:
+            audio = recognizer.record(source)
         return recognizer.recognize_google(audio)
-    except sr.UnknownValueError:
-        return "Sorry, I couldn't understand your speech."
-    except sr.RequestError as e:
-        return f"Error with speech recognition service: {e}"
+    except Exception as e:
+        return f"Error transcribing audio: {e}"
 
-# Streamlit UI
-st.title("Voice-Enabled Chatbot with OpenAI")
+# Function for text-to-speech
+def speak(text):
+    tts = gTTS(text, lang="en")
+    audio_stream = BytesIO()
+    tts.write_to_fp(audio_stream)
+    audio_stream.seek(0)
+    return audio_stream
 
-st.sidebar.header("Instructions")
-st.sidebar.write("""
-1. Click 'Record' to provide your input via voice.
-2. The chatbot will respond with text and voice.
-""")
+# Voice input section
+uploaded_audio = st.file_uploader("Upload your voice input (.wav only):", type="wav")
+if uploaded_audio:
+    st.info("Processing your voice input...")
+    user_query = transcribe_audio(uploaded_audio)
+    st.success(f"You said: {user_query}")
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+    # Process the query
+    if user_query:
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai.api_key)
+        prompt = PromptTemplate(
+            input_variables=["chat_history", "user_input"],
+            template="This is the chat history: {chat_history}. User says: {user_input}. Respond accordingly."
+        )
+        response = llm.generate_responses(
+            [{"chat_history": chat_history, "user_input": user_query}]
+        )
+        reply = response[0].text
+        st.write(f"Bot: {reply}")
+        chat_history.append({"user": user_query, "bot": reply})
 
-# Chat Input
-st.header("Chat with AI")
-user_input = st.text_input("Type your message or use voice input:")
-
-if st.button("Record Voice Input"):
-    user_input = recognize_speech_from_microphone()
-    st.text(f"You said: {user_input}")
-
-if user_input:
-    # ChatGPT API call
-    with st.spinner("Generating response..."):
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": user_input},
-                ],
-            )
-            bot_response = response['choices'][0]['message']['content'].strip()
-            st.session_state.chat_history.append((user_input, bot_response))
-
-            # Display the response
-            st.text_area("Chat History", value="\n".join(
-                [f"User: {q}\nBot: {a}" for q, a in st.session_state.chat_history]), height=300)
-
-            # Speak the response
-            speak_text(bot_response)
-
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        # Play bot's response
+        st.audio(speak(reply), format="audio/wav")
