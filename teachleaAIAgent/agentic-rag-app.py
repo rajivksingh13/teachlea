@@ -496,7 +496,8 @@ class BlogScraper:
 
 class TeachleaBot:
     def __init__(self):
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        # self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.openai_api_key = st.secrets["OPEN_AI_KEY"]
         if not self.openai_api_key:
             raise ValueError("OpenAI API key not found in environment variables")
 
